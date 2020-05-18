@@ -1,0 +1,6 @@
+[Unit]
+Description=Backup Ghost
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/sh -c 'rsync -avr --delete-after /root/backup /backup/weekly'

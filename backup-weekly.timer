@@ -1,0 +1,9 @@
+[Unit]
+Description=Run backup-weekly.service
+
+[Timer]
+OnCalendar=Mon *-*-* 02:02:02
+
+
+[Install]
+WantedBy=basic.target

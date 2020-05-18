@@ -102,6 +102,8 @@ scp -oStrictHostKeyChecking=no firewall.sh root@"$SERVER_IP4":
 scp -oStrictHostKeyChecking=no ./remote/docker-compose.yml root@"$SERVER_IP4":
 scp -oStrictHostKeyChecking=no ./remote/cms-ghost.conf root@"$SERVER_IP4":
 scp -oStrictHostKeyChecking=no ./remote/ifcfg-eth0:1 root@"$SERVER_IP4":/etc/sysconfig/network-scripts/ifcfg-eth0:1
+scp -oStrictHostKeyChecking=no backup-weekly.service root@"$SERVER_IP4":/usr/lib/systemd/system/backup-weekly.service
+scp -oStrictHostKeyChecking=no backup-weekly.timer root@"$SERVER_IP4":/usr/lib/systemd/system/backup-weekly.timer
 
 echo '12. Copy available certificates'
 if [ -d letsencrypt ]

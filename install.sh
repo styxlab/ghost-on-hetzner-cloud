@@ -28,10 +28,14 @@ dnf -y install nginx
 mv cms-ghost.conf /etc/nginx/conf.d/
 systemctl enable --now nginx
 
-echo "16.5 Start Ghost"
+echo "16.5 Enable Backups to same disk"
+mkdir -p /root/backup/weekly
+systemctl enable --now backup-weekly.time
+
+echo "16.6 Start Ghost"
 docker-compose up -d
 
-echo '16.6 Simple tests'
+echo '16.7 Simple tests'
 ufw status
 uname -a
 docker version
