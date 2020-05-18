@@ -138,5 +138,5 @@ duration=$SECONDS
 echo "$(($duration / 60)) minutes and $(($duration % 60)) seconds elapsed."
 
 echo '29. Register Ghost'
-echo "Please go to https://cms.${DOMAIN}/ and complete the setup!"
+echo "Please go to https://cms.${DOMAIN}/ghost and complete the setup!"
 echo "Log into your system with ssh root@${DOMAIN}"
