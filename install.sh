@@ -33,12 +33,18 @@ systemctl enable --now certbot-renew.timer
 
 echo "16.6 Enable backups to same disk"
 mkdir -p /root/backup/weekly
-systemctl enable --now backup-weekly.time
+systemctl enable --now backup-weekly.timer
 
-echo "16.7 Start Ghost"
+echo "16.7 Daily system update (no reboot)"
+systemctl enable --now system-backup.timer
+
+echo "16.8 Schedule weekly system reboot"
+systemctl enable --now system-reboot.timer
+
+echo "16.9 Start Ghost"
 docker-compose up -d
 
-echo '16.8 Simple tests'
+echo '16.10 Simple tests'
 ufw status
 uname -a
 docker version

@@ -1,0 +1,8 @@
+[Unit]
+Description=Weekly system reboot
+
+[Timer]
+OnCalendar=Tue *-*-* 04:04:04
+
+[Install]
+WantedBy=multi-user.target

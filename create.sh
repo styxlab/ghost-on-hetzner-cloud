@@ -104,6 +104,10 @@ scp -oStrictHostKeyChecking=no ./remote/cms-ghost.conf root@"$SERVER_IP4":
 scp -oStrictHostKeyChecking=no ./remote/ifcfg-eth0:1 root@"$SERVER_IP4":/etc/sysconfig/network-scripts/ifcfg-eth0:1
 scp -oStrictHostKeyChecking=no backup-weekly.service root@"$SERVER_IP4":/usr/lib/systemd/system/backup-weekly.service
 scp -oStrictHostKeyChecking=no backup-weekly.timer root@"$SERVER_IP4":/usr/lib/systemd/system/backup-weekly.timer
+scp -oStrictHostKeyChecking=no system-update.service root@"$SERVER_IP4":/usr/lib/systemd/system/system-update.service
+scp -oStrictHostKeyChecking=no system-update.timer root@"$SERVER_IP4":/usr/lib/systemd/system/system-update.timer
+scp -oStrictHostKeyChecking=no system-reboot.service root@"$SERVER_IP4":/usr/lib/systemd/system/system-reboot.service
+scp -oStrictHostKeyChecking=no system-reboot.timer root@"$SERVER_IP4":/usr/lib/systemd/system/system-reboot.timer
 
 echo '12. Copy available certificates'
 if [ -d letsencrypt ]

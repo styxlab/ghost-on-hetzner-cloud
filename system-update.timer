@@ -1,0 +1,8 @@
+[Unit]
+Description=Run daily system update
+
+[Timer]
+OnCalendar=*-*-* 03:03:03
+
+[Install]
+WantedBy=multi-user.target

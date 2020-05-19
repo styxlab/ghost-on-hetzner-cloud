@@ -1,0 +1,6 @@
+[Unit]
+Description=System update
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/sh -c 'dnf -y update'

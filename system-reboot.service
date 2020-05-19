@@ -1,0 +1,6 @@
+[Unit]
+Description=System Reboot
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/sh -c 'reboot'
