@@ -36,7 +36,7 @@ mkdir -p /root/backup/weekly
 systemctl enable --now backup-weekly.timer
 
 echo "16.7 Daily system update (no reboot)"
-systemctl enable --now system-backup.timer
+systemctl enable --now system-update.timer
 
 echo "16.8 Schedule weekly system reboot"
 systemctl enable --now system-reboot.timer
