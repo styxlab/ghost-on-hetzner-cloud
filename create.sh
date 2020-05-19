@@ -5,6 +5,7 @@ set -o nounset # abort on unbound variable
 SECONDS=0
 
 ENVFILE=".env"
+INSTALL_DIR="./install"
 
 echo "1. Check for environment"
 if [ ! -f "${ENVFILE}" ]; then
@@ -16,6 +17,9 @@ echo "2. Get environment variables from .env"
 set -o allexport
 source ./.env
 set +o allexport
+
+SSH_PORT=${SSH_PORT} || 22
+echo ${SSH_PORT}
 
 echo "3. Create Floating IP if not exists"
 FLOATING_IP4=$(hcloud floating-ip list -l name=${CLOUD_SERVER_NAME} -o noheader -o columns=ip)
@@ -90,44 +94,54 @@ fi
 
 echo '10. Substitute secrets'
 mkdir -p remote
-eval "echo \"$(cat docker-compose.yml)\"" > ./remote/docker-compose.yml
-eval "echo \"$(cat cms-ghost.conf)\"" > ./remote/cms-ghost.conf
-eval "echo \"$(cat ifcfg-eth0:1)\"" > ./remote/ifcfg-eth0:1
+eval "echo \"$(cat ${INSTALL_DIR}/docker-compose.yml)\"" > ./remote/docker-compose.yml
+eval "echo \"$(cat ${INSTALL_DIR}/cms-ghost.conf)\"" > ./remote/cms-ghost.conf
+eval "echo \"$(cat ${INSTALL_DIR}/ifcfg-eth0:1)\"" > ./remote/ifcfg-eth0:1
 
+
+echo '11.0 Check for private firewall config'
+FW_FILE="./private/firewall2.sh"
+if [ ! -f "${FW_FILE}" ]
+then
+	FW_FILE="${INSTALL_DIR}/firewall.sh"
+else 
+	scp -oStrictHostKeyChecking=no ./private/fw-install.sh root@${SERVER_IP4}:
+	scp -oStrictHostKeyChecking=no ./private/fwstart.sh root@${SERVER_IP4}:
+fi
 
 echo '11. Copy files and directories'
-scp -oStrictHostKeyChecking=no pre-install.sh root@"$SERVER_IP4":
-scp -oStrictHostKeyChecking=no install.sh root@"$SERVER_IP4":
-scp -oStrictHostKeyChecking=no firewall.sh root@"$SERVER_IP4":
-scp -oStrictHostKeyChecking=no ./remote/docker-compose.yml root@"$SERVER_IP4":
-scp -oStrictHostKeyChecking=no ./remote/cms-ghost.conf root@"$SERVER_IP4":
-scp -oStrictHostKeyChecking=no ./remote/ifcfg-eth0:1 root@"$SERVER_IP4":/etc/sysconfig/network-scripts/ifcfg-eth0:1
-scp -oStrictHostKeyChecking=no backup-weekly.service root@"$SERVER_IP4":/usr/lib/systemd/system/backup-weekly.service
-scp -oStrictHostKeyChecking=no backup-weekly.timer root@"$SERVER_IP4":/usr/lib/systemd/system/backup-weekly.timer
-scp -oStrictHostKeyChecking=no system-update.service root@"$SERVER_IP4":/usr/lib/systemd/system/system-update.service
-scp -oStrictHostKeyChecking=no system-update.timer root@"$SERVER_IP4":/usr/lib/systemd/system/system-update.timer
-scp -oStrictHostKeyChecking=no system-reboot.service root@"$SERVER_IP4":/usr/lib/systemd/system/system-reboot.service
-scp -oStrictHostKeyChecking=no system-reboot.timer root@"$SERVER_IP4":/usr/lib/systemd/system/system-reboot.timer
+scp -oStrictHostKeyChecking=no "${INSTALL_DIR}/pre-install.sh" root@${SERVER_IP4}:
+scp -oStrictHostKeyChecking=no "${INSTALL_DIR}/install.sh" root@${SERVER_IP4}:
+scp -oStrictHostKeyChecking=no "${FW_FILE}" root@${SERVER_IP4}:
+scp -oStrictHostKeyChecking=no ./remote/docker-compose.yml root@${SERVER_IP4}:
+scp -oStrictHostKeyChecking=no ./remote/cms-ghost.conf root@${SERVER_IP4}:
+scp -oStrictHostKeyChecking=no ./remote/ifcfg-eth0:1 root@${SERVER_IP4}:/etc/sysconfig/network-scripts/ifcfg-eth0:1
+scp -oStrictHostKeyChecking=no "${INSTALL_DIR}/backup-weekly.service" root@${SERVER_IP4}:/usr/lib/systemd/system/backup-weekly.service
+scp -oStrictHostKeyChecking=no "${INSTALL_DIR}/backup-weekly.timer" root@${SERVER_IP4}:/usr/lib/systemd/system/backup-weekly.timer
+scp -oStrictHostKeyChecking=no "${INSTALL_DIR}/system-update.service" root@${SERVER_IP4}:/usr/lib/systemd/system/system-update.service
+scp -oStrictHostKeyChecking=no "${INSTALL_DIR}/system-update.timer" root@${SERVER_IP4}:/usr/lib/systemd/system/system-update.timer
+scp -oStrictHostKeyChecking=no "${INSTALL_DIR}/system-reboot.service" root@${SERVER_IP4}:/usr/lib/systemd/system/system-reboot.service
+scp -oStrictHostKeyChecking=no "${INSTALL_DIR}/system-reboot.timer" root@${SERVER_IP4}:/usr/lib/systemd/system/system-reboot.timer
 
 echo '12. Copy available certificates'
 if [ -d letsencrypt ]
 then
 	echo "letsencrypt directory found..."
-    scp -r letsencrypt root@"$SERVER_IP4":/etc/
+    scp -r letsencrypt root@${SERVER_IP4}:/etc/
 fi
 
 echo '13. Pre-Install, Reboot'
-ssh root@"$SERVER_IP4" sh pre-install.sh 
-ssh root@"$SERVER_IP4" reboot
+ssh root@${SERVER_IP4} sh pre-install.sh ${SSH_PORT} ${FLOATING_IP4} ${SERVER_IP4}
+ssh -p ${SSH_PORT} root@${SERVER_IP4} reboot
 
 echo '14. Wait for ping contact ...'${SERVER_IP4}
 while ! ping -c1 ${SERVER_IP4} &>/dev/null; do sleep 1; done
 
-echo '15. Wait for port contact ...'${SERVER_IP4}' on port 22'
-while ! nmap -Pn -p 22 ${SERVER_IP4} |grep "open" &>/dev/null; do sleep 2; done
+echo '15. Wait for port contact ...'${SERVER_IP4}' on port '${SSH_PORT}
+while ! nmap -Pn -p ${SSH_PORT} ${SERVER_IP4} |grep "open" &>/dev/null; do sleep 2; done
 
 echo '16. Install remote'
-ssh root@"$SERVER_IP4" sh install.sh ${DOMAIN} ${EMAIL}
+ssh -p ${SSH_PORT} root@${SERVER_IP4} sh install.sh ${DOMAIN} ${EMAIL}
 
 echo '17. Remove temporary files'
 rm -rf remote
@@ -138,11 +152,11 @@ then
 	echo "move existing directory..."
     mv letsencrypt letsencrypt_$(date +%Y%m%d)
 fi
-scp -r root@"$SERVER_IP4":/etc/letsencrypt .
+scp -r -P ${SSH_PORT} root@${SERVER_IP4}:/etc/letsencrypt .
 
 duration=$SECONDS
 echo "$(($duration / 60)) minutes and $(($duration % 60)) seconds elapsed."
 
 echo '29. Register Ghost'
 echo "Please go to https://cms.${DOMAIN}/ghost and complete the setup!"
-echo "Log into your system with ssh root@${DOMAIN}"
+echo "Log into your system with ssh -p ${SSH_PORT} root@${DOMAIN}"

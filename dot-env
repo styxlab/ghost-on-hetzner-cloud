@@ -1,0 +1,22 @@
+# Fill out and copy to .env
+
+# SSH (change ssh port)
+SSH_PORT=22
+
+# Server
+CLOUD_SERVER_NAME=ghost
+CLOUD_SERVER_IMAGE=fedora-32
+CLOUD_SERVER_TYPE=cx11
+CLOUD_SERVER_LOCATION=fsn1
+CLOUD_SSH_KEY=you@home
+
+# LetsEncrypt + Nginx
+DOMAIN=your-blog.com
+EMAIL=you@your-blog.com
+
+# Ghost email settings
+EMAIL_FROM=noreply@your-blog.com
+SMTP_HOST=mail.server.com
+SMTP_PORT=587
+SMTP_USER=user@server.com
+SMTP_PASS=SMTP_password

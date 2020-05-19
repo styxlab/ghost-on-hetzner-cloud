@@ -45,8 +45,6 @@ echo "16.9 Start Ghost"
 docker-compose up -d
 
 echo '16.10 Simple tests'
-ufw status
 uname -a
 docker version
 systemctl status nginx
-

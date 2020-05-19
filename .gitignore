@@ -1,6 +1,7 @@
 # Node template
 remote
 letsencrypt*
+private
 
 # Logs
 logs
