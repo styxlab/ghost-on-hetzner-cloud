@@ -100,7 +100,7 @@ eval "echo \"$(cat ${INSTALL_DIR}/ifcfg-eth0:1)\"" > ./remote/ifcfg-eth0:1
 
 
 echo '11.0 Check for private firewall config'
-FW_FILE="./private/firewall2.sh"
+FW_FILE="./private/firewall.sh"
 if [ ! -f "${FW_FILE}" ]
 then
 	FW_FILE="${INSTALL_DIR}/firewall.sh"
