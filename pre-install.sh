@@ -12,6 +12,7 @@ systemctl enable --now ufw.service
 
 echo "11.3 Update system"
 dnf -y update
+systemctl daemon-reload
 
 echo "11.4 Kernel tweak for docker"
 grubby --update-kernel=ALL --args="systemd.unified_cgroup_hierarchy=0"

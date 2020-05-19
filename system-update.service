@@ -3,4 +3,4 @@ Description=System update
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/sh -c 'dnf -y update'
+ExecStart=/usr/bin/sh -c 'dnf -y update; systemctl daemon-reload'
