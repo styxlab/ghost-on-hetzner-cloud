@@ -10,7 +10,7 @@ dnf -y install docker docker-compose
 systemctl enable --now docker
 
 echo "16.2 Install certbot"
-dnf -y install certbot 
+dnf -y install certbot python-certbot-nginx
 
 echo "16.3 Obtain certificates"
 keyfile="/etc/letsencrypt/live/${DOMAIN}/fullchain.pem"
@@ -30,6 +30,7 @@ systemctl enable --now nginx
 
 echo "16.5 Enable cetificate renewal"
 systemctl enable --now certbot-renew.timer
+#ExecStart=/usr/bin/certbot renew --nginx
 
 echo "16.6 Enable backups to same disk"
 mkdir -p /root/backup/weekly
